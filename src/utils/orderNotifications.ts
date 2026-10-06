@@ -163,7 +163,12 @@ export function subscribeToOrderStatusStream(
   let closed = false;
 
   const connect = () => {
-    if (closed) return;
+    if (
+      closed ||
+      (typeof window !== 'undefined' && window.location.hostname.includes('github.io'))
+    ) {
+      return;
+    }
     try {
       es = new EventSource('/api/orders/stream');
       es.onmessage = (event) => {

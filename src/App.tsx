@@ -35,6 +35,8 @@ import {
   NICARAGUA_DEPARTMENTS,
   OFFICIAL_PLATFORM_ACCOUNTS,
   compressImageFile,
+  STATIC_FALLBACK_PRODUCTS,
+  STATIC_FALLBACK_STORES,
 } from './utils/format';
 import { BusinessDashboard } from './components/BusinessDashboard';
 import { AdminConsole } from './components/AdminConsole';
@@ -127,9 +129,11 @@ function loadInitialRecentValidatedCodes(): RecentValidatedCode[] {
 export default function App() {
   const [view, setView] = useState<AppView>('catalog');
   const [user, setUser] = useState<User | null>(null);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [stores, setStores] = useState<PublicStoreSummary[]>([]);
-  const [loadingCatalog, setLoadingCatalog] = useState(true);
+  const [products, setProducts] = useState<Product[]>(STATIC_FALLBACK_PRODUCTS);
+  const [stores, setStores] = useState<PublicStoreSummary[]>(
+    STATIC_FALLBACK_STORES as unknown as PublicStoreSummary[]
+  );
+  const [loadingCatalog, setLoadingCatalog] = useState(false);
 
   // Filters
   const [searchQuery, setSearchQuery] = useState('');
@@ -258,13 +262,14 @@ export default function App() {
 
   useEffect(() => {
     const init = async () => {
-      setLoadingCatalog(true);
       await loadCatalogAndStores();
       try {
-        const me = await api<{ user: User }>('/api/auth/me');
-        setUser(me.user);
-        setCustomerName(me.user.name);
-        setCustomerPhone(me.user.phone);
+        const me = await api<{ user: User | null }>('/api/auth/me');
+        if (me?.user) {
+          setUser(me.user);
+          setCustomerName(me.user.name || '');
+          setCustomerPhone(me.user.phone || '');
+        }
       } catch {
         // If container restarted and session expired, restore from browser backup if present
         try {
@@ -282,10 +287,12 @@ export default function App() {
                   password: 'pulperia1234',
                 }),
               });
-              if (restored.sessionToken) setSessionToken(restored.sessionToken);
-              setUser(restored.user);
-              setCustomerName(restored.user.name);
-              setCustomerPhone(restored.user.phone);
+              if (restored?.sessionToken) setSessionToken(restored.sessionToken);
+              if (restored?.user) {
+                setUser(restored.user);
+                setCustomerName(restored.user.name || '');
+                setCustomerPhone(restored.user.phone || '');
+              }
               await loadCatalogAndStores();
             }
           }

@@ -217,7 +217,7 @@ export function setSessionToken(token: string | null) {
   }
 }
 
-const STATIC_FALLBACK_STORES = [
+export const STATIC_FALLBACK_STORES = [
   {
     id: 1,
     storeName: 'Pulpería La Bendición',
@@ -238,21 +238,21 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'María Auxiliadora Cano',
         account: '134082049',
         instructions: 'Transferencia Bancanet o LAFISE Móvil en Córdobas',
       },
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'María Auxiliadora Cano',
         account: '+505 58898311',
         instructions: 'Billetera Móvil activa 24/7',
       },
       {
-        id: 'efectivo',
+        id: 'efectivo' as const,
         label: 'Efectivo al recibir',
         recipient: 'Pago en efectivo al entregar',
         account: 'Córdobas (C$)',
@@ -280,21 +280,21 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'Carlos Alberto Blandón',
         account: '+505 58898311',
         instructions: 'Transferencia inmediata a Billetera Móvil',
       },
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'Carlos Alberto Blandón',
         account: '134082049',
         instructions: 'Enviar número de referencia de transferencia',
       },
       {
-        id: 'efectivo',
+        id: 'efectivo' as const,
         label: 'Efectivo al recibir',
         recipient: 'Pago contra entrega',
         account: 'Efectivo C$',
@@ -322,21 +322,21 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'Rosa Argentina Pineda',
         account: '134082049',
         instructions: 'Cuenta LAFISE en Córdobas',
       },
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'Rosa Argentina Pineda',
         account: '+505 58898311',
         instructions: 'Billetera Móvil activa',
       },
       {
-        id: 'efectivo',
+        id: 'efectivo' as const,
         label: 'Efectivo al recibir',
         recipient: 'Pago contra entrega',
         account: 'Efectivo C$',
@@ -364,14 +364,14 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'José Dolores Membreño',
         account: '+505 58898311',
         instructions: 'Billetera Móvil Masaya',
       },
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'José Dolores Membreño',
         account: '134082049',
@@ -399,14 +399,14 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'Lucía Chamorro Mora',
         account: '134082049',
         instructions: 'Transferencia Bancanet LAFISE',
       },
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'Lucía Chamorro Mora',
         account: '+505 58898311',
@@ -434,14 +434,14 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'Denis Zeledón Rizo',
         account: '+505 58898311',
         instructions: 'Billetera Móvil activa',
       },
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'Denis Zeledón Rizo',
         account: '134082049',
@@ -469,14 +469,14 @@ const STATIC_FALLBACK_STORES = [
     quotaExhausted: false,
     paymentMethods: [
       {
-        id: 'lafise',
+        id: 'lafise' as const,
         label: 'LAFISE',
         recipient: 'Marlon Valdivia Rugama',
         account: '134082049',
         instructions: 'Cuenta LAFISE Estelí',
       },
       {
-        id: 'mobile_wallet',
+        id: 'mobile_wallet' as const,
         label: 'Billetera Móvil',
         recipient: 'Marlon Valdivia Rugama',
         account: '+505 58898311',
@@ -486,7 +486,7 @@ const STATIC_FALLBACK_STORES = [
   },
 ];
 
-const STATIC_FALLBACK_PRODUCTS: Product[] = [
+export const STATIC_FALLBACK_PRODUCTS: Product[] = [
   {
     id: 1,
     storeId: 1,
@@ -675,20 +675,29 @@ function handleStaticHostFallback(path: string, options: RequestInit = {}): any 
     return { success: true, stores };
   }
   if (path.startsWith('/api/auth/me')) {
-    const savedUser = getStored('pulperia_saved_user', null);
+    const savedUser = getStored<any>('pulperia_saved_user', null);
+    if (!savedUser) {
+      const err: any = new Error('Inicia sesión para continuar.');
+      err.status = 401;
+      throw err;
+    }
     return { success: true, user: savedUser };
   }
-  if (path.startsWith('/api/auth/demo-owner') || path.startsWith('/api/auth/login') || path.startsWith('/api/auth/register')) {
-    const role = path.includes('demo-owner') ? 'negocio' : body.role || 'cliente';
+  if (
+    path.startsWith('/api/auth/demo-owner') ||
+    path.startsWith('/api/auth/login') ||
+    path.startsWith('/api/auth/register')
+  ) {
+    const role = path.includes('demo-owner') ? 'negocio' : body.rol || body.role || 'cliente';
     const user = {
       id: role === 'negocio' ? 1 : 2,
-      name: body.name || (role === 'negocio' ? 'María Auxiliadora Cano' : 'Cliente Vecino'),
+      name: body.nombre || body.name || (role === 'negocio' ? 'María Auxiliadora Cano' : 'Cliente Vecino'),
       email: body.email || (role === 'negocio' ? 'maria@pulperia.ni' : 'vecino@pulperia.ni'),
-      phone: body.phone || '8845-2310',
+      phone: body.telefono || body.phone || '8845-2310',
       role,
     };
     setStored('pulperia_saved_user', user);
-    return { success: true, token: 'static-demo-token', user };
+    return { success: true, sessionToken: 'static-demo-token', token: 'static-demo-token', user };
   }
   if (path.startsWith('/api/auth/role')) {
     const current = getStored('pulperia_saved_user', {
@@ -765,7 +774,21 @@ function handleStaticHostFallback(path: string, options: RequestInit = {}): any 
       productsPerPlan: PRODUCTS_PER_QUOTA,
     };
   }
-  if (path.startsWith('/api/business/credits') && method === 'GET') {
+  if (path.startsWith('/api/business/credits')) {
+    if (method === 'POST') {
+      const next = {
+        id: Date.now(),
+        customerName: body.customerName || 'Vecino',
+        customerPhone: body.customerPhone || '8888-8888',
+        notes: body.notes || 'Compra al fiado',
+        amount: Number(body.amount || 100),
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      };
+      credits.unshift(next);
+      setStored('pulperia_static_credits', credits);
+      return { success: true, credit: next };
+    }
     return { success: true, credits };
   }
   if (path.startsWith('/api/admin/summary')) {
