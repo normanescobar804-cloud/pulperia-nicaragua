@@ -1,0 +1,6 @@
+{
+  "name": "Pulpería Nicaragua",
+  "description": "Marketplace local y sistema de gestión para pulperías de Nicaragua con catálogo en córdobas, pedidos a domicilio o retiro, verificación de transferencias y panel de comercio.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
